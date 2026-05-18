@@ -3,96 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FLIGHTWATCH</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#002147">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Flight Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --bg: #0a0c0f;
-    --surface: #111418;
-    --border: #1e2530;
-    --accent: #e8a020;
-    --accent-dim: #7a5010;
-    --green: #22c55e;
-    --red: #ef4444;
-    --blue: #3b82f6;
-    --yellow: #facc15;
-    --text: #d4dbe8;
-    --muted: #4a5568;
-    --mono: 'Share Tech Mono', monospace;
-    --sans: 'Barlow Condensed', sans-serif;
+    --longwood-dark-green: #004c46;
+    --longwood-navy: #002147;
+    --longwood-mint: #ceebee;
+    --longwood-gray: #a2a4a3;
+    --brock-gold: #dfc25b;
+    --brock-stone: #baab93;
+    --white: #ffffff;
+    --off-white: #f7f5f1;
+
+    /* Status colors — kept functional but warmed to palette */
+    --status-green: #2d7a4f;
+    --status-yellow: #b8860b;
+    --status-red: #8b2a2a;
+    --status-blue: #004c46;
+    --status-muted: #a2a4a3;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
+  html, body {
     min-height: 100vh;
-    overflow-x: hidden;
+    background: var(--off-white);
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--longwood-navy);
   }
 
-  /* Scanline overlay */
+  /* Gold sidebar strip — brand signature */
   body::before {
     content: '';
     position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.08) 2px,
-      rgba(0,0,0,0.08) 4px
-    );
-    pointer-events: none;
+    top: 0; left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--brock-gold);
     z-index: 100;
   }
 
+  /* ── Header ── */
   header {
+    background: var(--longwood-navy);
+    padding: 1.75rem 2rem 1.5rem 2rem;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    padding: 18px 32px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
   }
 
-  .logo {
-    font-family: var(--sans);
-    font-weight: 900;
-    font-size: 28px;
-    letter-spacing: 8px;
-    color: var(--accent);
+  header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .header-left { display: flex; flex-direction: column; gap: 0.3rem; }
+
+  .header-eyebrow {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
+    color: var(--brock-gold);
   }
 
-  .logo span {
-    color: var(--text);
-    opacity: 0.3;
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.85rem;
+    line-height: 1.05;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .header-title em {
+    font-style: italic;
+    color: var(--longwood-mint);
+  }
+
+  .heading-rule {
+    width: 40px;
+    height: 2px;
+    background: var(--brock-gold);
+    margin-top: 0.6rem;
   }
 
   .header-right {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   .live-indicator {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
+    gap: 6px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    color: var(--longwood-gray);
   }
 
   .live-dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: var(--green);
+    background: var(--status-green);
     animation: pulse 2s infinite;
   }
 
@@ -102,214 +132,244 @@
   }
 
   #clock {
-    font-family: var(--mono);
-    font-size: 18px;
-    color: var(--accent);
-    letter-spacing: 2px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--brock-gold);
+    letter-spacing: 0.08em;
   }
 
   .btn-add {
-    background: var(--accent);
-    color: #000;
+    background: var(--brock-gold);
+    color: var(--longwood-navy);
     border: none;
-    padding: 8px 20px;
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 3px;
+    padding: 0.5rem 1.1rem;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.15s;
+    white-space: nowrap;
   }
-  .btn-add:hover { background: #f5b840; }
+  .btn-add:hover { background: #e8ce72; }
 
   .btn-refresh {
     background: none;
-    border: 1px solid var(--accent-dim);
-    color: var(--accent);
-    padding: 8px 18px;
-    font-family: var(--sans);
+    border: 1px solid rgba(223,194,91,0.35);
+    color: var(--brock-gold);
+    padding: 0.5rem 1rem;
+    font-family: 'Source Sans 3', sans-serif;
     font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 3px;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.15s;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    white-space: nowrap;
   }
-  .btn-refresh:hover { border-color: var(--accent); background: rgba(232,160,32,0.08); }
+  .btn-refresh:hover { border-color: var(--brock-gold); background: rgba(223,194,91,0.08); }
   .btn-refresh:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-refresh .spin { display: inline-block; }
   .btn-refresh.loading .spin { animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ── Main ── */
   main {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 32px 24px;
+    padding: 1.75rem 1.75rem 3rem 2rem;
   }
 
-  /* Board header */
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(162,164,163,0.25);
+  }
+
+  .toolbar-left {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--longwood-gray);
+  }
+
+  .call-count {
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: var(--longwood-gray);
+  }
+
+  /* ── Board header ── */
   .board-header {
     display: grid;
-    grid-template-columns: 1fr 130px 110px 140px 130px 48px;
+    grid-template-columns: 1fr 130px 110px 140px 150px 48px;
     gap: 0;
-    padding: 8px 20px;
-    border-bottom: 1px solid var(--accent-dim);
-    font-family: var(--sans);
+    padding: 0.5rem 1rem;
+    border-bottom: 2px solid var(--brock-gold);
+    font-size: 0.6rem;
     font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 3px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--longwood-gray);
     margin-bottom: 4px;
   }
 
+  /* ── Empty state ── */
   .empty-state {
     text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-    font-family: var(--sans);
-    font-size: 16px;
-    letter-spacing: 2px;
+    padding: 5rem 2rem;
+    color: var(--longwood-gray);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    border: 1px dashed var(--border);
+    border: 1px dashed rgba(162,164,163,0.35);
+    background: var(--white);
   }
 
   .empty-state .big {
-    font-size: 48px;
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
     font-weight: 900;
-    color: var(--border);
+    color: var(--longwood-mint);
     display: block;
-    margin-bottom: 12px;
-    letter-spacing: 4px;
+    margin-bottom: 0.75rem;
   }
 
-  /* Flight row */
+  /* ── Flight row ── */
   .flight-row {
     display: grid;
-    grid-template-columns: 1fr 130px 110px 130px 48px;
+    grid-template-columns: 1fr 130px 110px 140px 150px 48px;
     gap: 0;
     align-items: center;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(162,164,163,0.2);
+    background: var(--white);
+    border-left: 3px solid var(--brock-gold);
     margin-bottom: 3px;
-    position: relative;
-    transition: background 0.2s;
-    animation: rowIn 0.3s ease;
+    transition: background 0.18s;
+    animation: rowIn 0.25s ease;
   }
 
   @keyframes rowIn {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
-  .flight-row:hover { background: #161b23; }
+  .flight-row:hover { background: var(--longwood-mint); }
 
   .flight-row.updating .flight-status {
     animation: flip 0.4s ease;
   }
 
   @keyframes flip {
-    0% { transform: rotateX(0deg); opacity: 1; }
-    50% { transform: rotateX(90deg); opacity: 0; }
-    100% { transform: rotateX(0deg); opacity: 1; }
+    0%   { transform: rotateX(0deg);  opacity: 1; }
+    50%  { transform: rotateX(90deg); opacity: 0; }
+    100% { transform: rotateX(0deg);  opacity: 1; }
   }
 
   .cell-label {
-    font-family: var(--sans);
+    font-family: 'Playfair Display', serif;
     font-weight: 700;
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: var(--text);
+    font-size: 0.95rem;
+    color: var(--longwood-navy);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .cell-flight {
-    font-family: var(--mono);
-    font-size: 14px;
-    color: var(--accent);
-    letter-spacing: 1px;
-  }
-
-  .cell-route {
-    font-family: var(--sans);
-    font-size: 15px;
-    font-weight: 400;
-    color: var(--text);
-    opacity: 0.7;
-    letter-spacing: 1px;
-  }
-
-  .cell-departs {
-    font-family: var(--mono);
-    font-size: 14px;
-    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--longwood-dark-green);
+    letter-spacing: 0.08em;
   }
 
   .cell-gate {
-    font-family: var(--mono);
-    font-size: 14px;
-    color: var(--muted);
-    letter-spacing: 2px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--longwood-gray);
+    letter-spacing: 0.08em;
   }
 
+  .cell-departs {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--longwood-navy);
+  }
+
+  /* Status badge */
   .flight-status {
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 2px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    padding: 4px 10px;
+    padding: 3px 8px;
     border: 1px solid currentColor;
     display: inline-block;
   }
 
-  .status-on-time    { color: var(--green); }
-  .status-delayed    { color: var(--yellow); }
-  .status-cancelled  { color: var(--red); }
-  .status-boarding   { color: var(--accent); animation: boardingPulse 1.5s infinite; }
-  .status-departed   { color: var(--blue); }
-  .status-landed     { color: var(--muted); }
-  .status-scheduled  { color: var(--muted); }
+  .status-on-time   { color: var(--status-green); }
+  .status-delayed   { color: var(--status-yellow); }
+  .status-cancelled { color: var(--status-red); }
+  .status-boarding  { color: var(--brock-gold); animation: boardingPulse 1.5s infinite; }
+  .status-departed  { color: var(--longwood-dark-green); }
+  .status-landed    { color: var(--status-muted); }
+  .status-scheduled { color: var(--status-muted); }
 
   @keyframes boardingPulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50%       { opacity: 0.5; }
   }
 
+  /* Actions */
   .cell-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     justify-content: flex-end;
   }
 
   .btn-icon {
     background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    width: 28px;
-    height: 28px;
+    border: 1px solid rgba(162,164,163,0.35);
+    color: var(--longwood-gray);
+    width: 26px;
+    height: 26px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 12px;
     transition: all 0.15s;
   }
-  .btn-icon:hover { border-color: var(--red); color: var(--red); }
+  .btn-icon:hover { border-color: var(--status-red); color: var(--status-red); }
 
-  /* Modal */
+  /* Last updated */
+  .last-updated {
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: var(--longwood-gray);
+    text-align: right;
+    margin-top: 1rem;
+  }
+
+  /* ── Modal ── */
   .modal-backdrop {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,33,71,0.7);
     z-index: 200;
     align-items: center;
     justify-content: center;
@@ -317,165 +377,204 @@
   .modal-backdrop.open { display: flex; }
 
   .modal {
-    background: var(--surface);
-    border: 1px solid var(--accent-dim);
-    padding: 36px;
+    background: var(--white);
+    border-top: 4px solid var(--brock-gold);
+    border: 1px solid rgba(162,164,163,0.35);
+    border-top: 4px solid var(--brock-gold);
+    padding: 2.25rem;
     width: 480px;
     max-width: 95vw;
     animation: modalIn 0.2s ease;
   }
 
   @keyframes modalIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-eyebrow {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brock-gold);
+    margin-bottom: 0.35rem;
   }
 
   .modal h2 {
-    font-family: var(--sans);
+    font-family: 'Playfair Display', serif;
     font-weight: 900;
-    font-size: 22px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 28px;
+    font-size: 1.5rem;
+    color: var(--longwood-navy);
+    margin-bottom: 0.6rem;
   }
 
-  .form-group {
-    margin-bottom: 20px;
+  .modal-rule {
+    width: 36px;
+    height: 2px;
+    background: var(--brock-gold);
+    margin-bottom: 1.5rem;
   }
+
+  .form-group { margin-bottom: 1.1rem; }
 
   .form-group label {
     display: block;
-    font-family: var(--sans);
-    font-size: 11px;
-    letter-spacing: 3px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
+    color: var(--longwood-gray);
+    margin-bottom: 6px;
   }
 
-  .form-group input, .form-group select {
+  .form-group input,
+  .form-group select {
     width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 14px;
-    font-family: var(--mono);
-    font-size: 14px;
+    background: var(--off-white);
+    border: 1px solid rgba(162,164,163,0.5);
+    color: var(--longwood-navy);
+    padding: 0.55rem 0.75rem;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.85rem;
     outline: none;
     transition: border-color 0.15s;
+    -webkit-appearance: none;
   }
-  .form-group input:focus, .form-group select:focus {
-    border-color: var(--accent);
-  }
-  .form-group select option { background: var(--bg); }
+  .form-group input:focus,
+  .form-group select:focus { border-color: var(--brock-gold); }
+  .form-group select option { background: var(--white); }
 
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* Airline preview pill */
+  .airline-preview-pill {
+    background: var(--off-white);
+    border: 1px solid rgba(162,164,163,0.5);
+    border-right: none;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--longwood-dark-green);
+    min-width: 44px;
+    text-align: center;
+    letter-spacing: 0.08em;
+  }
+
+  .flight-preview-line {
+    margin-top: 5px;
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--longwood-gray);
+    letter-spacing: 0.12em;
+  }
 
   .modal-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 28px;
+    gap: 10px;
+    margin-top: 1.5rem;
     justify-content: flex-end;
   }
 
   .btn-cancel {
     background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 8px 24px;
-    font-family: var(--sans);
+    border: 1px solid rgba(162,164,163,0.5);
+    color: var(--longwood-gray);
+    padding: 0.5rem 1.25rem;
+    font-family: 'Source Sans 3', sans-serif;
     font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 2px;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.15s;
   }
-  .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+  .btn-cancel:hover { border-color: var(--longwood-navy); color: var(--longwood-navy); }
 
   .btn-save {
-    background: var(--accent);
+    background: var(--longwood-navy);
     border: none;
-    color: #000;
-    padding: 8px 24px;
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 2px;
+    color: var(--white);
+    padding: 0.5rem 1.25rem;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.15s;
   }
-  .btn-save:hover { background: #f5b840; }
+  .btn-save:hover { background: var(--longwood-dark-green); }
 
-  .last-updated {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    text-align: right;
-    margin-top: 16px;
-    letter-spacing: 1px;
-  }
-
-  .toolbar {
+  /* ── Footer ── */
+  .page-footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.75rem 2rem 2rem;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
+    flex-direction: column;
+    gap: 0.4rem;
   }
 
-  .toolbar-left {
-    font-family: var(--sans);
-    font-size: 13px;
-    letter-spacing: 3px;
+  .footer-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--longwood-gray);
+    opacity: 0.2;
+  }
+
+  .footer-text {
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--longwood-gray);
   }
 
-  .api-notice {
-    background: #1a1200;
-    border: 1px solid var(--accent-dim);
-    padding: 10px 16px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent-dim);
-    letter-spacing: 1px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  .footer-text strong {
+    color: var(--longwood-dark-green);
+    font-weight: 600;
   }
 
+  /* ── Mobile ── */
   @media (max-width: 700px) {
     .board-header { display: none; }
+
     .flight-row {
       grid-template-columns: 1fr 1fr;
       grid-template-rows: auto auto auto;
-      gap: 8px;
+      gap: 6px;
     }
+
     header {
-      padding: 12px 16px;
-      flex-wrap: wrap;
-      gap: 10px;
+      padding: 1.25rem 1rem 1.1rem 1.25rem;
+      gap: 0.75rem;
     }
-    .logo { font-size: 18px; letter-spacing: 3px; }
+
+    .header-title { font-size: 1.4rem; }
+
     .header-right {
       width: 100%;
       justify-content: space-between;
-      gap: 12px;
     }
-    #clock { font-size: 14px; }
+
     .live-indicator { display: none; }
-    .btn-refresh { padding: 6px 12px; font-size: 11px; letter-spacing: 1px; }
-    .btn-add { padding: 6px 12px; font-size: 11px; letter-spacing: 1px; }
+
+    .btn-refresh,
+    .btn-add { padding: 0.4rem 0.75rem; font-size: 0.65rem; }
+
+    main { padding: 1.25rem 1rem 2rem 1.25rem; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">Flight<span>///</span>Watch</div>
+  <div class="header-left">
+    <div class="header-eyebrow">Longwood University · Brock Experiences</div>
+    <h1 class="header-title">Flight <em>Tracker</em></h1>
+    <div class="heading-rule"></div>
+  </div>
   <div class="header-right">
     <div class="live-indicator">
       <div class="live-dot"></div>
@@ -492,7 +591,7 @@
 <main>
   <div class="toolbar">
     <div class="toolbar-left" id="flight-count">0 flights tracked</div>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px;" id="call-count">API calls this month: 0 / 100</div>
+    <div class="call-count" id="call-count">API calls this month: 0 / 100</div>
   </div>
 
   <div class="board-header">
@@ -509,10 +608,18 @@
   <div class="last-updated" id="last-updated"></div>
 </main>
 
+<div class="page-footer">
+  <div class="footer-rule"></div>
+  <div class="footer-text"><strong>Brock Experiences</strong> · Longwood University</div>
+</div>
+
 <!-- Add Flight Modal -->
 <div class="modal-backdrop" id="modal" onclick="closeModalIfBackdrop(event)">
   <div class="modal">
+    <div class="modal-eyebrow">Brock Experiences</div>
     <h2>Add Flight</h2>
+    <div class="modal-rule"></div>
+
     <div class="form-group">
       <label>Custom Label</label>
       <input type="text" id="f-label" placeholder="e.g. Dad's Flight, Team Arrival" maxlength="30">
@@ -561,23 +668,16 @@
     <div class="form-group">
       <label>Flight Number</label>
       <div style="display:flex;gap:0;align-items:center;">
-        <div id="airline-preview" style="
-          background:var(--bg);border:1px solid var(--border);border-right:none;
-          padding:10px 12px;font-family:var(--mono);font-size:14px;
-          color:var(--accent);min-width:44px;text-align:center;letter-spacing:1px;
-        ">—</div>
+        <div id="airline-preview" class="airline-preview-pill">—</div>
         <input type="number" id="f-number" placeholder="e.g. 1234" min="1" max="9999"
           style="flex:1;border-left:none;" oninput="updatePreview()">
       </div>
-      <div id="flight-preview-line" style="
-        margin-top:6px;font-family:var(--mono);font-size:12px;
-        color:var(--muted);letter-spacing:2px;
-      "></div>
+      <div id="flight-preview-line" class="flight-preview-line"></div>
     </div>
     <div class="form-group">
-  <label>Scheduled Departure</label>
-  <input type="time" id="f-departs">
-</div>
+      <label>Scheduled Departure</label>
+      <input type="time" id="f-departs">
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
       <button class="btn-save" onclick="addFlight()">Save Flight</button>
@@ -587,24 +687,20 @@
 
 <script>
 // ─── Storage ───────────────────────────────────────────────────────────────
-const STORAGE_KEY      = 'flightwatch_flights';
-const LANDED_KEY       = 'flightwatch_landed';   // set of ids that have landed
-const CALL_COUNT_KEY   = 'flightwatch_calls';
+const STORAGE_KEY    = 'flightwatch_flights';
+const LANDED_KEY     = 'flightwatch_landed';
+const CALL_COUNT_KEY = 'flightwatch_calls';
 
 function loadFlights() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
   catch { return []; }
 }
-function saveFlights(f) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(f));
-}
+function saveFlights(f) { localStorage.setItem(STORAGE_KEY, JSON.stringify(f)); }
 function loadLanded() {
   try { return new Set(JSON.parse(localStorage.getItem(LANDED_KEY)) || []); }
   catch { return new Set(); }
 }
-function saveLanded(s) {
-  localStorage.setItem(LANDED_KEY, JSON.stringify([...s]));
-}
+function saveLanded(s) { localStorage.setItem(LANDED_KEY, JSON.stringify([...s])); }
 
 // ─── Call counter ─────────────────────────────────────────────────────────
 function getCallCount() {
@@ -628,10 +724,7 @@ function renderCallCount() {
   if (el) el.textContent = `API calls this month: ${getCallCount()} / 100`;
 }
 
-// ─── AviationStack API ────────────────────────────────────────────────────
-
-
-// Normalize AviationStack status strings to our internal set
+// ─── AviationStack API ─────────────────────────────────────────────────────
 function normalizeStatus(raw) {
   if (!raw) return 'scheduled';
   const s = raw.toLowerCase();
@@ -646,36 +739,35 @@ function normalizeStatus(raw) {
 
 async function fetchFlightStatus(flight) {
   const url = `https://flightwatch-proxy.josh-blakely.workers.dev?flight_iata=${flight.number}`;
-const res  = await fetch(url);
+  const res  = await fetch(url);
   const data = await res.json();
   incrementCallCount();
 
   const f = data?.data?.[0];
-if (!f) return { status: 'scheduled', gate: '—', delay: 0 };
-const status    = normalizeStatus(f.flight_status);
-const gate      = f.departure?.gate || '—';
-const delay     = f.departure?.delay || 0;
-const scheduled = f.arrival?.scheduled || null;
-const estimated = f.arrival?.estimated || null;
-const useEstimated = ['active', 'landed'].includes(f.flight_status?.toLowerCase());
-const arrivalRaw = (useEstimated && estimated) ? estimated : scheduled;
-const arrival = arrivalRaw
-  ? new Date(arrivalRaw).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })
-  : '—';
-return { status, gate, delay, arrival };
+  if (!f) return { status: 'scheduled', gate: '—', delay: 0 };
+  const status    = normalizeStatus(f.flight_status);
+  const gate      = f.departure?.gate || '—';
+  const delay     = f.departure?.delay || 0;
+  const scheduled = f.arrival?.scheduled || null;
+  const estimated = f.arrival?.estimated || null;
+  const useEstimated = ['active', 'landed'].includes(f.flight_status?.toLowerCase());
+  const arrivalRaw = (useEstimated && estimated) ? estimated : scheduled;
+  const arrival = arrivalRaw
+    ? new Date(arrivalRaw).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })
+    : '—';
+  return { status, gate, delay, arrival };
 }
 
-// ─── State ────────────────────────────────────────────────────────────────
-let flights    = loadFlights();
-let landedIds  = loadLanded();   // flights that have landed — skip API calls
-let liveData   = {};             // { id: { status, gate, delay } }
+// ─── State ─────────────────────────────────────────────────────────────────
+let flights   = loadFlights();
+let landedIds = loadLanded();
+let liveData  = {};
 
-// Pre-populate liveData for already-landed flights so they render correctly
 landedIds.forEach(id => {
   liveData[id] = { status: 'landed', gate: '—', delay: 0 };
 });
 
-// ─── Render ───────────────────────────────────────────────────────────────
+// ─── Render ────────────────────────────────────────────────────────────────
 function statusClass(status) {
   const map = {
     'scheduled': 'status-scheduled',
@@ -685,7 +777,7 @@ function statusClass(status) {
     'delayed':   'status-delayed',
     'cancelled': 'status-cancelled',
     'landed':    'status-landed',
-    'waiting': 'status-scheduled',
+    'waiting':   'status-scheduled',
   };
   return map[status] || 'status-scheduled';
 }
@@ -700,7 +792,7 @@ function statusLabel(status, delay) {
     'delayed':   'DELAYED',
     'cancelled': 'CANCELLED',
     'landed':    'LANDED',
-    'waiting': 'WAITING',
+    'waiting':   'WAITING',
   };
   return labels[status] || status.toUpperCase();
 }
@@ -714,27 +806,27 @@ function renderFlights() {
     list.innerHTML = `<div class="empty-state">
       <span class="big">✈</span>
       No flights tracked yet<br>
-      <small style="font-size:12px;margin-top:8px;display:block">Click + ADD FLIGHT to get started</small>
+      <small style="font-size:0.65rem;margin-top:6px;display:block;letter-spacing:0.1em;">Click + Add Flight to get started</small>
     </div>`;
     return;
   }
 
   list.innerHTML = flights.map(f => {
     const now = new Date();
-const withinWindow = !f.departs || (() => {
-  const [hh, mm] = f.departs.split(':').map(Number);
-  const dep = new Date(); dep.setHours(hh, mm, 0, 0);
-  return (dep - now) / 60000 <= 120;
-})();
-const live = withinWindow
-  ? (liveData[f.id] || { status: 'scheduled', gate: '—', delay: 0 })
-  : { status: 'waiting', gate: '—', delay: 0 };
+    const withinWindow = !f.departs || (() => {
+      const [hh, mm] = f.departs.split(':').map(Number);
+      const dep = new Date(); dep.setHours(hh, mm, 0, 0);
+      return (dep - now) / 60000 <= 120;
+    })();
+    const live = withinWindow
+      ? (liveData[f.id] || { status: 'scheduled', gate: '—', delay: 0 })
+      : { status: 'waiting', gate: '—', delay: 0 };
     const sc      = statusClass(live.status);
     const sl      = statusLabel(live.status, live.delay);
     const gate    = live.gate || '—';
     const arrival = live.arrival || '—';
     const isLanded = landedIds.has(f.id);
-    const rowStyle = isLanded ? 'opacity:0.45;' : '';
+    const rowStyle = isLanded ? 'opacity:0.4;' : '';
 
     return `<div class="flight-row" id="row-${f.id}" style="${rowStyle}">
       <div class="cell-label" title="${f.label}">${f.label}</div>
@@ -749,31 +841,23 @@ const live = withinWindow
   }).join('');
 }
 
-// ─── Refresh ──────────────────────────────────────────────────────────────
+// ─── Refresh ───────────────────────────────────────────────────────────────
 let isRefreshing = false;
 
 async function refreshAll() {
   if (isRefreshing) return;
 
-  // Only fetch for flights that haven't landed
   const now = new Date();
-const toFetch = flights.filter(f => {
-  if (landedIds.has(f.id)) return false;
-  if (!f.departs) return true;
-  const [hh, mm] = f.departs.split(':').map(Number);
-  const dep = new Date();
-  dep.setHours(hh, mm, 0, 0);
-  const minsUntil = (dep - now) / 60000;
-  return minsUntil <= 120;
-});
+  const toFetch = flights.filter(f => {
+    if (landedIds.has(f.id)) return false;
+    if (!f.departs) return true;
+    const [hh, mm] = f.departs.split(':').map(Number);
+    const dep = new Date(); dep.setHours(hh, mm, 0, 0);
+    return (dep - now) / 60000 <= 120;
+  });
 
-  if (toFetch.length === 0) {
-    renderFlights();
-    isRefreshing = false;
-    return;
-  }
+  if (toFetch.length === 0) { renderFlights(); return; }
 
-  isRefreshing = true;  
   isRefreshing = true;
   const btn = document.getElementById('btn-refresh');
   if (btn) { btn.classList.add('loading'); btn.disabled = true; }
@@ -794,13 +878,11 @@ const toFetch = flights.filter(f => {
     const prev = liveData[id];
     liveData[id] = data;
 
-    // If newly landed, freeze it — no more API calls
     if (data.status === 'landed' && !landedIds.has(id)) {
       landedIds.add(id);
       saveLanded(landedIds);
     }
 
-    // Flash row on status change
     if (prev && prev.status !== data.status) {
       const row = document.getElementById(`row-${id}`);
       if (row) {
@@ -812,7 +894,6 @@ const toFetch = flights.filter(f => {
 
   renderFlights();
   renderCallCount();
-
   document.getElementById('last-updated').textContent =
     `Last updated: ${now.toLocaleTimeString()}`;
 
@@ -822,16 +903,15 @@ const toFetch = flights.filter(f => {
 
 function manualRefresh() { refreshAll(); }
 
-// ─── Clock ────────────────────────────────────────────────────────────────
+// ─── Clock ─────────────────────────────────────────────────────────────────
 function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {
     hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'
   });
 }
 setInterval(updateClock, 1000);
 
-// ─── Airline preview ──────────────────────────────────────────────────────
+// ─── Airline preview ───────────────────────────────────────────────────────
 function updatePreview() {
   const airline = document.getElementById('f-airline').value;
   const num     = document.getElementById('f-number').value;
@@ -844,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('f-airline').addEventListener('change', updatePreview);
 });
 
-// ─── Add / Remove ─────────────────────────────────────────────────────────
+// ─── Add / Remove ──────────────────────────────────────────────────────────
 function addFlight() {
   const label   = document.getElementById('f-label').value.trim();
   const airline = document.getElementById('f-airline').value;
@@ -857,13 +937,14 @@ function addFlight() {
   labelEl.style.borderColor = airlineEl.style.borderColor = numEl.style.borderColor = '';
 
   let valid = true;
-  if (!label)   { labelEl.style.borderColor   = 'var(--red)'; valid = false; }
-  if (!airline) { airlineEl.style.borderColor = 'var(--red)'; valid = false; }
-  if (!num)     { numEl.style.borderColor     = 'var(--red)'; valid = false; }
+  if (!label)   { labelEl.style.borderColor   = '#8b2a2a'; valid = false; }
+  if (!airline) { airlineEl.style.borderColor = '#8b2a2a'; valid = false; }
+  if (!num)     { numEl.style.borderColor     = '#8b2a2a'; valid = false; }
   if (!valid) return;
 
-  const departs = document.getElementById('f-departs').value; // "HH:MM" or ""
-const flight = { id: Date.now().toString(), label, number: `${airline}${num}`, departs };  flights.push(flight);
+  const departs = document.getElementById('f-departs').value;
+  const flight = { id: Date.now().toString(), label, number: `${airline}${num}`, departs };
+  flights.push(flight);
   saveFlights(flights);
   closeModal();
   renderFlights();
@@ -880,14 +961,14 @@ function removeFlight(id) {
   renderCallCount();
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────
+// ─── Modal ─────────────────────────────────────────────────────────────────
 function openModal() {
   document.getElementById('f-label').value   = '';
   document.getElementById('f-airline').value = '';
   document.getElementById('f-number').value  = '';
-  document.getElementById('airline-preview').textContent        = '—';
-  document.getElementById('flight-preview-line').textContent    = '';
   document.getElementById('f-departs').value = '';
+  document.getElementById('airline-preview').textContent     = '—';
+  document.getElementById('flight-preview-line').textContent = '';
   ['f-label','f-airline','f-number'].forEach(id =>
     document.getElementById(id).style.borderColor = ''
   );
@@ -908,8 +989,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('modal').classList.contains('open')) addFlight();
 });
 
-// ─── Init ─────────────────────────────────────────────────────────────────
-// ─── Init ─────────────────────────────────────────────────────────────────
+// ─── Init ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   renderFlights();
   renderCallCount();

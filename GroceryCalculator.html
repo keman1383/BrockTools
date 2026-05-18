@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Lunch Calculator 🥪</title>
+  <meta name="description" content="Calculate sandwich supplies, packaging, and sides for large group trips." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; }
+    /* Hide native number spinners */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // ─── Constants ───────────────────────────────────────────────────────────
+    const BREAD_SLICES_PER_LOAF      = 20;
+    const GF_BREAD_SLICES_PER_LOAF   = 10; // GF loaves are smaller
+    const MEAT_SLICES_PER_PACK       = 9;
+    const MEAT_SLICES_PER_SANDWICH   = 2;
+    const CHEESE_SLICES_PER_PACK     = 12;
+    const CHEESE_SLICES_PER_SANDWICH = 2;
+    const PB_SERVINGS_PER_JAR        = 15; // ~2 tbsp per sandwich
+    const JELLY_SERVINGS_PER_JAR     = 20;
+    const CRACKER_SERVINGS_PER_BOX   = 30;
+
+    // ─── Calculation logic ────────────────────────────────────────────────────
+    function calcResults({ people, days, pbPercent, dietary }) {
+      const totalSandwiches = people * days;
+      const pbSandwiches    = Math.round(totalSandwiches * (pbPercent / 100));
+      const meatSandwiches  = totalSandwiches - pbSandwiches;
+
+      // Bread — split regular vs GF by exact headcount
+      const gfPeople      = dietary.glutenFreeCount || 0;
+      const regularPeople = people - gfPeople;
+      const regularLoaves = Math.ceil((regularPeople * days * 2) / BREAD_SLICES_PER_LOAF);
+      const gfLoaves      = gfPeople > 0
+        ? Math.ceil((gfPeople * days * 2) / GF_BREAD_SLICES_PER_LOAF)
+        : 0;
+
+      // Lunch meat & cheese (meat sandwiches only)
+      const meatPacks   = meatSandwiches > 0
+        ? Math.ceil((meatSandwiches * MEAT_SLICES_PER_SANDWICH) / MEAT_SLICES_PER_PACK)
+        : 0;
+      const cheesePacks = (!dietary.vegan && meatSandwiches > 0)
+        ? Math.ceil((meatSandwiches * CHEESE_SLICES_PER_SANDWICH) / CHEESE_SLICES_PER_PACK)
+        : 0;
+
+      // PB&J
+      const pbJars    = pbSandwiches > 0 ? Math.ceil(pbSandwiches / PB_SERVINGS_PER_JAR)   : 0;
+      const jellyJars = pbSandwiches > 0 ? Math.ceil(pbSandwiches / JELLY_SERVINGS_PER_JAR) : 0;
+
+      // Packaging
+      const sandwichBags = totalSandwiches;
+      const brownBags    = people * days;
+
+      // Sides
+      const crackerBoxes = Math.ceil((people * days) / CRACKER_SERVINGS_PER_BOX);
+
+      return {
+        totalSandwiches, pbSandwiches, meatSandwiches,
+        regularLoaves, gfLoaves,
+        meatPacks, cheesePacks,
+        pbJars, jellyJars,
+        sandwichBags, brownBags,
+        crackerBoxes,
+      };
+    }
+
+    // ─── Dietary options config ───────────────────────────────────────────────
+    const dietaryOptions = [
+      { key: "glutenFree",  countKey: "glutenFreeCount",  label: "Gluten-Free", icon: "🌾", color: "#e8a838" },
+      { key: "nutFree",     countKey: "nutFreeCount",     label: "Nut-Free",    icon: "🥜", color: "#c0392b" },
+      { key: "vegan",       countKey: "veganCount",       label: "Vegan",       icon: "🌿", color: "#27ae60" },
+      { key: "vegetarian",  countKey: "vegetarianCount",  label: "Vegetarian",  icon: "🥗", color: "#2ecc71" },
+    ];
+
+    // ─── ResultSection component ─────────────────────────────────────────────
+    function ResultSection({ title, items }) {
+      if (!items || items.length === 0) return null;
+      return (
+        <div style={{ marginBottom: "20px" }}>
+          <div style={S.sectionHeading}>{title}</div>
+          <div style={S.itemGrid}>
+            {items.map(item => (
+              <div key={item.label} style={S.itemCard}>
+                <div style={S.itemIcon}>{item.icon}</div>
+                <div style={S.itemQty}>{item.value}</div>
+                <div style={S.itemLabel}>{item.label}</div>
+                {item.note && <div style={S.itemNote}>{item.note}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── Main app ─────────────────────────────────────────────────────────────
+    function App() {
+      const [people,     setPeople]     = useState(10);
+      const [days,       setDays]       = useState(3);
+      const [pbPercent,  setPbPercent]  = useState(12);
+      const [dietary,    setDietary]    = useState({
+        glutenFree: false, glutenFreeCount: 0,
+        nutFree:    false, nutFreeCount:    0,
+        vegan:      false, veganCount:      0,
+        vegetarian: false, vegetarianCount: 0,
+      });
+      const [results,    setResults]    = useState(null);
+      const [calculated, setCalculated] = useState(false);
+
+      const toggleDietary = (key, countKey) => {
+        setDietary(prev => {
+          const nowOn = !prev[key];
+          return { ...prev, [key]: nowOn, [countKey]: nowOn ? prev[countKey] : 0 };
+        });
+        setCalculated(false);
+      };
+
+      const setDietaryCount = (countKey, val) => {
+        setDietary(prev => ({ ...prev, [countKey]: Math.max(0, Math.min(people, val)) }));
+        setCalculated(false);
+      };
+
+      const handleCalculate = () => {
+        setResults(calcResults({ people, days, pbPercent, dietary }));
+        setCalculated(true);
+      };
+
+      const step = (setter, current, delta, min = 1) => {
+        setter(Math.max(min, current + delta));
+        setCalculated(false);
+      };
+
+      const sandwichItems = results ? [
+        results.regularLoaves > 0 && { label: "Loaves of Bread",      value: results.regularLoaves, icon: "🍞", note: "Regular" },
+        results.gfLoaves      > 0 && { label: "GF Loaves of Bread",   value: results.gfLoaves,      icon: "🌾", note: "Gluten-Free" },
+        results.meatPacks     > 0 && { label: "Packs of Lunch Meat",  value: results.meatPacks,     icon: "🥩", note: "~2 slices/sandwich" },
+        !dietary.vegan && results.cheesePacks > 0 && { label: "Packs of Cheese", value: results.cheesePacks, icon: "🧀", note: "~2 slices/sandwich" },
+        !dietary.nutFree && results.pbJars > 0    && { label: "Jars of Peanut Butter", value: results.pbJars,    icon: "🥜", note: null },
+        results.jellyJars > 0 && { label: "Jars of Jelly", value: results.jellyJars, icon: "🍇", note: null },
+      ].filter(Boolean) : [];
+
+      const packagingItems = results ? [
+        { label: "Sandwich Bags",      value: results.sandwichBags, icon: "🛍️", note: "1 per sandwich" },
+        { label: "Brown Paper Bags",   value: results.brownBags,    icon: "🧺", note: "1 per person/day" },
+      ] : [];
+
+      const sidesItems = results ? [
+        { label: "Boxes of Crackers", value: results.crackerBoxes, icon: "🫙", note: "~30 servings/box" },
+      ] : [];
+
+      return (
+        <div style={S.page}>
+          <div style={S.card}>
+
+            {/* Header */}
+            <div style={S.header}>
+              <span style={S.headerIcon}>🥪</span>
+              <div>
+                <h1 style={S.title}>Group Lunch Calculator</h1>
+                <p style={S.subtitle}>Group trip grocery planner</p>
+              </div>
+            </div>
+
+            {/* People & Days */}
+            <div style={S.inputGrid}>
+              {[
+                { label: "Number of People", val: people, set: setPeople },
+                { label: "Days Making Lunches", val: days,   set: setDays   },
+              ].map(({ label, val, set }) => (
+                <div key={label} style={S.inputGroup}>
+                  <label style={S.label}>{label}</label>
+                  <div style={S.stepper}>
+                    <button style={{...S.stepBtn, borderRadius:"8px 0 0 8px"}} onClick={() => step(set, val, -1)}>−</button>
+                    <input
+                      type="number"
+                      value={val}
+                      min={1}
+                      onChange={e => { set(Math.max(1, Number(e.target.value))); setCalculated(false); }}
+                      style={S.numInput}
+                    />
+                    <button style={{...S.stepBtn, borderRadius:"0 8px 8px 0"}} onClick={() => step(set, val, +1)}>+</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* PB&J Slider */}
+            <div style={S.sliderGroup}>
+              <label style={S.label}>
+                PB&J vs. Lunch Meat —{" "}
+                <span style={S.accent}>
+                  {pbPercent === 0 ? "All Lunch Meat" : pbPercent === 100 ? "All PB&J" : `${pbPercent}% PB&J`}
+                </span>
+              </label>
+              <input
+                type="range" min={0} max={100} value={pbPercent}
+                onChange={e => { setPbPercent(Number(e.target.value)); setCalculated(false); }}
+                style={S.slider}
+              />
+              <div style={S.sliderLabels}>
+                <span>All Lunch Meat</span>
+                <span>All PB&J</span>
+              </div>
+            </div>
+
+            {/* Dietary */}
+            <div style={S.dietarySection}>
+              <label style={S.label}>Dietary Considerations</label>
+              <div style={S.dietaryGrid}>
+                {dietaryOptions.map(({ key, countKey, label, icon, color }) => (
+                  <div key={key} style={S.dietaryRow}>
+                    <button
+                      onClick={() => toggleDietary(key, countKey)}
+                      style={{
+                        ...S.dietaryBtn,
+                        ...(dietary[key] ? { background: color, color: "#fff", borderColor: color } : {}),
+                      }}
+                    >
+                      <span>{icon}</span>
+                      <span>{label}</span>
+                      {dietary[key] && <span style={S.checkmark}>✓</span>}
+                    </button>
+                    {dietary[key] && (
+                      <div style={S.countRow}>
+                        <span style={S.countLabel}>How many?</span>
+                        <div style={S.miniStepper}>
+                          <button style={S.miniBtn} onClick={() => setDietaryCount(countKey, dietary[countKey] - 1)}>−</button>
+                          <span style={S.countVal}>{dietary[countKey]}</span>
+                          <button style={S.miniBtn} onClick={() => setDietaryCount(countKey, dietary[countKey] + 1)}>+</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {dietary.nutFree && (
+              <div style={S.alertBox}>
+                ⚠️ Nut-Free selected — peanut butter will be excluded from the shopping list.
+              </div>
+            )}
+
+            {/* Calculate */}
+            <button style={S.calcBtn} onClick={handleCalculate}>
+              Calculate Shopping List
+            </button>
+
+            {/* Results */}
+            {calculated && results && (
+              <div style={S.results}>
+                <div style={S.resultsSummary}>
+                  <span style={S.summaryNum}>{results.totalSandwiches}</span>
+                  <span style={S.summaryLabel}>Total Sandwiches</span>
+                  <span style={S.divider}>·</span>
+                  <span style={S.summaryNum}>{results.meatSandwiches}</span>
+                  <span style={S.summaryLabel}>Meat</span>
+                  <span style={S.divider}>·</span>
+                  <span style={S.summaryNum}>{results.pbSandwiches}</span>
+                  <span style={S.summaryLabel}>PB&J</span>
+                </div>
+                <ResultSection title="🥪 Sandwiches" items={sandwichItems} />
+                <ResultSection title="🛍️ Packaging"  items={packagingItems} />
+                <ResultSection title="🍘 Sides"       items={sidesItems} />
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+    // ─── Styles ───────────────────────────────────────────────────────────────
+    const S = {
+      page: { minHeight:"100vh", display:"flex", alignItems:"flex-start", justifyContent:"center", padding:"32px 16px", fontFamily:"Georgia, serif" },
+      card: { background:"rgba(255,255,255,0.04)", backdropFilter:"blur(20px)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:"24px", padding:"36px", width:"100%", maxWidth:"580px", color:"#f0f0f0" },
+      header: { display:"flex", alignItems:"center", gap:"16px", marginBottom:"32px", borderBottom:"1px solid rgba(255,255,255,0.1)", paddingBottom:"24px" },
+      headerIcon: { fontSize:"48px" },
+      title: { margin:0, fontSize:"28px", fontWeight:"700", letterSpacing:"-0.5px" },
+      subtitle: { margin:"4px 0 0", color:"#aaa", fontSize:"14px", fontStyle:"italic" },
+      inputGrid: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"20px", marginBottom:"24px" },
+      inputGroup: { display:"flex", flexDirection:"column", gap:"8px" },
+      label: { fontSize:"13px", textTransform:"uppercase", letterSpacing:"0.08em", color:"#aaa", fontFamily:"sans-serif" },
+      stepper: { display:"flex", alignItems:"center" },
+      stepBtn: { background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.15)", color:"#fff", width:"36px", height:"44px", cursor:"pointer", fontSize:"18px" },
+      numInput: { background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.15)", borderLeft:"none", borderRight:"none", color:"#fff", textAlign:"center", fontSize:"20px", fontFamily:"Georgia, serif", width:"70px", height:"44px", outline:"none" },
+      sliderGroup: { marginBottom:"24px" },
+      accent: { color:"#f0a500" },
+      slider: { width:"100%", marginTop:"10px", accentColor:"#f0a500", display:"block" },
+      sliderLabels: { display:"flex", justifyContent:"space-between", fontSize:"11px", color:"#666", marginTop:"4px", fontFamily:"sans-serif" },
+      dietarySection: { marginBottom:"24px" },
+      dietaryGrid: { display:"flex", flexDirection:"column", gap:"10px", marginTop:"10px" },
+      dietaryRow: { display:"flex", flexDirection:"column", gap:"6px" },
+      dietaryBtn: { display:"flex", alignItems:"center", gap:"8px", padding:"10px 14px", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:"10px", color:"#ddd", cursor:"pointer", fontSize:"14px", fontFamily:"sans-serif" },
+      checkmark: { marginLeft:"auto", fontSize:"12px" },
+      countRow: { display:"flex", alignItems:"center", gap:"12px", paddingLeft:"12px" },
+      countLabel: { fontSize:"12px", color:"#aaa", fontFamily:"sans-serif" },
+      miniStepper: { display:"flex", alignItems:"center", gap:"0" },
+      miniBtn: { background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.2)", color:"#fff", width:"28px", height:"28px", cursor:"pointer", fontSize:"14px", borderRadius:"6px" },
+      countVal: { width:"36px", textAlign:"center", fontSize:"16px", fontFamily:"Georgia, serif", color:"#f0a500" },
+      alertBox: { background:"rgba(240,165,0,0.12)", border:"1px solid rgba(240,165,0,0.3)", borderRadius:"10px", padding:"12px 16px", fontSize:"13px", color:"#f0c060", marginBottom:"20px", fontFamily:"sans-serif" },
+      calcBtn: { width:"100%", padding:"16px", background:"linear-gradient(135deg, #f0a500, #e8621a)", border:"none", borderRadius:"12px", color:"#fff", fontSize:"16px", fontWeight:"700", cursor:"pointer", letterSpacing:"0.04em", fontFamily:"Georgia, serif" },
+      results: { marginTop:"28px", borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:"24px" },
+      resultsSummary: { display:"flex", alignItems:"center", gap:"10px", marginBottom:"20px", background:"rgba(255,255,255,0.04)", borderRadius:"12px", padding:"14px 18px", flexWrap:"wrap" },
+      summaryNum: { fontSize:"24px", fontWeight:"700", color:"#f0a500" },
+      summaryLabel: { fontSize:"13px", color:"#aaa", fontFamily:"sans-serif" },
+      divider: { color:"#444", fontSize:"20px" },
+      sectionHeading: { fontSize:"13px", textTransform:"uppercase", letterSpacing:"0.08em", color:"#f0a500", fontFamily:"sans-serif", fontWeight:"700", marginBottom:"10px", marginTop:"4px" },
+      itemGrid: { display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:"12px" },
+      itemCard: { background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:"14px", padding:"16px 12px", textAlign:"center" },
+      itemIcon: { fontSize:"28px", marginBottom:"6px" },
+      itemQty: { fontSize:"32px", fontWeight:"700", color:"#f0a500", lineHeight:1 },
+      itemLabel: { fontSize:"12px", color:"#ccc", marginTop:"6px", fontFamily:"sans-serif", lineHeight:"1.3" },
+      itemNote: { fontSize:"10px", color:"#777", marginTop:"3px", fontFamily:"sans-serif" },
+    };
+  </script>
+</body>
+</html>

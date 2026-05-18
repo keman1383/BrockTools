@@ -388,7 +388,7 @@
     .summary-bar {
       margin: 0 1.25rem 0 1.75rem;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       border: 1px solid #e2ddd6;
       background: var(--white);
     }
@@ -562,6 +562,9 @@
       <div class="alert" id="nut-alert" style="display:none">
         Nut-Free selected — peanut butter will be excluded from the list.
       </div>
+      <div class="alert" id="veg-alert" style="display:none">
+        Vegetarian selected — Tofurkey will be calculated in place of lunch meat for those guests.
+      </div>
     </div>
   </div>
 
@@ -582,6 +585,10 @@
       <div class="summary-cell">
         <div class="summary-num" id="r-meat-count">0</div>
         <div class="summary-lbl">Meat</div>
+      </div>
+      <div class="summary-cell">
+        <div class="summary-num" id="r-veg-count">0</div>
+        <div class="summary-lbl">Vegetarian</div>
       </div>
       <div class="summary-cell">
         <div class="summary-num" id="r-pb-count">0</div>
@@ -623,6 +630,8 @@ const CHEESE_SLICES_PER_SANDWICH = 2;
 const PB_SERVINGS_PER_JAR        = 15;
 const JELLY_SERVINGS_PER_JAR     = 20;
 const CRACKER_SERVINGS_PER_BOX   = 30;
+const TOFURKEY_SLICES_PER_PACK   = 9;
+const TOFURKEY_SLICES_PER_SANDWICH = 2;
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let people    = 10;
@@ -654,15 +663,20 @@ function calcResults() {
   const regularLoaves = Math.ceil((regularPeople * days * 2) / BREAD_SLICES_PER_LOAF);
   const gfLoaves      = gfPeople > 0 ? Math.ceil((gfPeople * days * 2) / GF_BREAD_SLICES_PER_LOAF) : 0;
 
-  const meatPacks   = meatSandwiches > 0 ? Math.ceil((meatSandwiches * MEAT_SLICES_PER_SANDWICH) / MEAT_SLICES_PER_PACK) : 0;
-  const cheesePacks = (!dietary.vegan && meatSandwiches > 0) ? Math.ceil((meatSandwiches * CHEESE_SLICES_PER_SANDWICH) / CHEESE_SLICES_PER_PACK) : 0;
+  const vegPeople        = dietary.vegetarianCount || 0;
+  const vegSandwiches    = vegPeople * days;
+  const meatOnlySandwiches = Math.max(0, meatSandwiches - vegSandwiches);
+
+  const meatPacks      = meatOnlySandwiches > 0 ? Math.ceil((meatOnlySandwiches * MEAT_SLICES_PER_SANDWICH) / MEAT_SLICES_PER_PACK) : 0;
+  const tofurkeyPacks  = vegSandwiches > 0 ? Math.ceil((vegSandwiches * TOFURKEY_SLICES_PER_SANDWICH) / TOFURKEY_SLICES_PER_PACK) : 0;
+  const cheesePacks = (!dietary.vegan && (meatOnlySandwiches + vegSandwiches) > 0) ? Math.ceil(((meatOnlySandwiches + vegSandwiches) * CHEESE_SLICES_PER_SANDWICH) / CHEESE_SLICES_PER_PACK) : 0;
   const pbJars      = pbSandwiches > 0 ? Math.ceil(pbSandwiches / PB_SERVINGS_PER_JAR)   : 0;
   const jellyJars   = pbSandwiches > 0 ? Math.ceil(pbSandwiches / JELLY_SERVINGS_PER_JAR) : 0;
   const sandwichBags = totalSandwiches;
   const brownBags    = people * days;
   const crackerBoxes = Math.ceil((people * days) / CRACKER_SERVINGS_PER_BOX);
 
-  return { totalSandwiches, pbSandwiches, meatSandwiches, regularLoaves, gfLoaves, meatPacks, cheesePacks, pbJars, jellyJars, sandwichBags, brownBags, crackerBoxes };
+  return { totalSandwiches, pbSandwiches, meatSandwiches, vegSandwiches, meatOnlySandwiches, regularLoaves, gfLoaves, meatPacks, tofurkeyPacks, cheesePacks, pbJars, jellyJars, sandwichBags, brownBags, crackerBoxes };
 }
 
 // ─── Render helpers ───────────────────────────────────────────────────────────
@@ -679,7 +693,8 @@ function renderResults() {
   const r = calcResults();
 
   document.getElementById('r-total').textContent     = r.totalSandwiches;
-  document.getElementById('r-meat-count').textContent = r.meatSandwiches;
+  document.getElementById('r-meat-count').textContent = r.meatOnlySandwiches;
+  document.getElementById('r-veg-count').textContent  = r.vegSandwiches;
   document.getElementById('r-pb-count').textContent   = r.pbSandwiches;
 
   // Sandwiches
@@ -687,6 +702,7 @@ function renderResults() {
   if (r.regularLoaves > 0) sw += resultCard('🍞', r.regularLoaves, 'Loaves of Bread',     'Regular');
   if (r.gfLoaves      > 0) sw += resultCard('🌾', r.gfLoaves,      'GF Loaves of Bread',  'Gluten-Free');
   if (r.meatPacks     > 0) sw += resultCard('🥩', r.meatPacks,     'Packs of Lunch Meat', '~2 slices/sandwich');
+  if (r.tofurkeyPacks > 0) sw += resultCard('🌿', r.tofurkeyPacks, 'Packs of Tofurkey',   '~2 slices/sandwich');
   if (!dietary.vegan && r.cheesePacks > 0) sw += resultCard('🧀', r.cheesePacks, 'Packs of Cheese', '~2 slices/sandwich');
   if (!dietary.nutFree && r.pbJars > 0)    sw += resultCard('🥜', r.pbJars,      'Jars of Peanut Butter', '');
   if (r.jellyJars > 0) sw += resultCard('🍇', r.jellyJars, 'Jars of Jelly', '');
@@ -737,6 +753,8 @@ function renderDietary() {
 
   // Nut-free alert
   document.getElementById('nut-alert').style.display = dietary.nutFree ? 'block' : 'none';
+  // Vegetarian alert
+  document.getElementById('veg-alert').style.display = dietary.vegetarian ? 'block' : 'none';
 }
 
 // ─── Event wiring ─────────────────────────────────────────────────────────────

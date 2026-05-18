@@ -1,333 +1,809 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Group Lunch Calculator 🥪</title>
-  <meta name="description" content="Calculate sandwich supplies, packaging, and sides for large group trips." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#002147">
+  <title>Grocery Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; }
-    /* Hide native number spinners */
+
+    :root {
+      --longwood-dark-green: #004c46;
+      --longwood-navy:       #002147;
+      --longwood-mint:       #ceebee;
+      --longwood-gray:       #a2a4a3;
+      --brock-gold:          #dfc25b;
+      --brock-stone:         #baab93;
+      --white:               #ffffff;
+      --off-white:           #f7f5f1;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--off-white);
+      font-family: 'Source Sans 3', sans-serif;
+      color: var(--longwood-navy);
+    }
+
+    /* Gold sidebar strip — brand signature */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--brock-gold);
+      z-index: 100;
+    }
+
+    .shell {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 0 3rem;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--longwood-navy);
+      padding: 2rem 1.75rem 1.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .header-eyebrow {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--brock-gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 2rem;
+      line-height: 1.05;
+      color: var(--white);
+      letter-spacing: -0.01em;
+    }
+
+    .header-title em {
+      font-style: italic;
+      color: var(--longwood-mint);
+    }
+
+    .heading-rule {
+      width: 48px;
+      height: 2px;
+      background: var(--brock-gold);
+      margin: 0.9rem 0 0.75rem;
+    }
+
+    .header-sub {
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: var(--brock-stone);
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+    }
+
+    /* ── Section header (matches hub exactly) ── */
+    .section-header {
+      padding: 1.75rem 1.75rem 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-header span {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--longwood-gray);
+      white-space: nowrap;
+    }
+
+    .section-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--longwood-gray);
+      opacity: 0.3;
+    }
+
+    /* ── Content panels — same card language as hub ── */
+    .panel {
+      margin: 0 1.25rem 0 1.75rem;
+      background: var(--white);
+      border: 1px solid #e2ddd6;
+      border-left: 3px solid var(--brock-gold);
+    }
+
+    .panel-body {
+      padding: 1.25rem 1.25rem 1rem;
+    }
+
+    .panel + .panel {
+      margin-top: 10px;
+    }
+
+    /* ── Field label ── */
+    .field-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--longwood-gray);
+      margin-bottom: 0.6rem;
+    }
+
+    /* ── Stepper ── */
+    .stepper {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid #e2ddd6;
+      width: fit-content;
+    }
+
+    .stepper button {
+      width: 36px;
+      background: var(--longwood-mint);
+      border: none;
+      color: var(--longwood-navy);
+      font-size: 18px;
+      font-weight: 300;
+      cursor: pointer;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .stepper button:hover { background: var(--brock-stone); }
+    .stepper button:active { background: var(--longwood-gray); }
+
+    .stepper input[type=number] {
+      width: 60px;
+      border: none;
+      border-left: 1px solid #e2ddd6;
+      border-right: 1px solid #e2ddd6;
+      text-align: center;
+      font-size: 1.2rem;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      color: var(--longwood-navy);
+      background: var(--white);
+      outline: none;
+      padding: 6px 2px;
+    }
+
     input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
     input[type=number] { -moz-appearance: textfield; }
+
+    /* ── Two-up row ── */
+    .two-up {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* ── Slider ── */
+    .slider-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.6rem;
+    }
+
+    .slider-val {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--longwood-dark-green);
+      background: var(--longwood-mint);
+      padding: 2px 10px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--brock-gold);
+      display: block;
+      cursor: pointer;
+    }
+
+    .slider-ends {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--longwood-gray);
+    }
+
+    /* ── Gold divider ── */
+    .gold-rule {
+      height: 1px;
+      background: var(--brock-gold);
+      opacity: 0.5;
+      margin: 1rem 0;
+    }
+
+    /* ── Dietary toggles ── */
+    .dietary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .dietary-item {
+      border: 1px solid #e2ddd6;
+    }
+
+    .dietary-item.active {
+      border-color: var(--longwood-dark-green);
+      border-left: 3px solid var(--brock-gold);
+    }
+
+    .dietary-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 10px;
+      background: var(--off-white);
+      border: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      text-align: left;
+    }
+
+    .dietary-item.active .dietary-toggle {
+      background: var(--longwood-mint);
+    }
+
+    .dietary-icon { font-size: 14px; }
+
+    .dietary-name {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--longwood-navy);
+      flex: 1;
+    }
+
+    .dietary-check {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 1.5px solid var(--longwood-gray);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      color: var(--white);
+    }
+
+    .dietary-item.active .dietary-check {
+      background: var(--longwood-dark-green);
+      border-color: var(--longwood-dark-green);
+    }
+
+    .dietary-count-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px 8px;
+      background: var(--white);
+      border-top: 1px solid #e2ddd6;
+    }
+
+    .dietary-count-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--longwood-gray);
+    }
+
+    .mini-stepper {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid #e2ddd6;
+    }
+
+    .mini-stepper button {
+      width: 24px;
+      height: 24px;
+      background: var(--longwood-mint);
+      border: none;
+      color: var(--longwood-navy);
+      font-size: 14px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .mini-stepper span {
+      width: 32px;
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--longwood-dark-green);
+      line-height: 24px;
+      border-left: 1px solid #e2ddd6;
+      border-right: 1px solid #e2ddd6;
+    }
+
+    /* ── Alert ── */
+    .alert {
+      margin-top: 0.75rem;
+      padding: 9px 12px;
+      background: #fffbee;
+      border-left: 3px solid var(--brock-gold);
+      font-size: 0.72rem;
+      color: var(--longwood-navy);
+      line-height: 1.5;
+    }
+
+    /* ── Calculate button ── */
+    .calc-btn-wrap {
+      margin: 0 1.25rem 0 1.75rem;
+    }
+
+    .calc-btn {
+      width: 100%;
+      padding: 1rem;
+      margin-top: 10px;
+      background: var(--longwood-dark-green);
+      border: none;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+
+    .calc-btn:hover { background: var(--longwood-navy); }
+    .calc-btn:active { transform: scale(0.99); }
+
+    /* ── Results summary bar ── */
+    .summary-bar {
+      margin: 0 1.25rem 0 1.75rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid #e2ddd6;
+      background: var(--white);
+    }
+
+    .summary-cell {
+      padding: 1rem 0.5rem;
+      text-align: center;
+      border-left: 1px solid #e2ddd6;
+    }
+
+    .summary-cell:first-child { border-left: none; }
+
+    .summary-num {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 1.9rem;
+      color: var(--longwood-dark-green);
+      line-height: 1;
+    }
+
+    .summary-lbl {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--longwood-gray);
+      margin-top: 5px;
+    }
+
+    /* ── Result cards — same card language as hub tool cards ── */
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 0 1.25rem 0 1.75rem;
+    }
+
+    .result-card {
+      background: var(--white);
+      border: 1px solid #e2ddd6;
+      border-left: 3px solid var(--brock-gold);
+      padding: 0.9rem 0.9rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .result-icon { font-size: 18px; margin-bottom: 0.3rem; }
+
+    .result-qty {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 2rem;
+      color: var(--longwood-dark-green);
+      line-height: 1;
+    }
+
+    .result-name {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--longwood-navy);
+      line-height: 1.3;
+      margin-top: 0.2rem;
+    }
+
+    .result-note {
+      font-size: 0.62rem;
+      font-weight: 300;
+      color: var(--longwood-gray);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Tip ── */
+    .tip {
+      margin: 0 1.25rem 0 1.75rem;
+      padding: 10px 14px;
+      background: var(--longwood-mint);
+      border-left: 3px solid var(--longwood-dark-green);
+      font-size: 0.72rem;
+      color: var(--longwood-dark-green);
+      line-height: 1.6;
+    }
+
+    .tip strong { font-weight: 600; }
+
+    /* ── Footer ── */
+    footer {
+      padding: 2rem 1.75rem 0 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .footer-rule {
+      width: 100%;
+      height: 1px;
+      background: var(--longwood-gray);
+      opacity: 0.25;
+    }
+
+    .footer-text {
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--longwood-gray);
+    }
+
+    .footer-text strong {
+      color: var(--longwood-dark-green);
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+<div class="shell">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <header>
+    <div class="header-eyebrow">Brock Experiences</div>
+    <h1 class="header-title">Grocery <em>Calculator</em></h1>
+    <div class="heading-rule"></div>
+    <p class="header-sub">Estimate sandwich supplies, packaging, and sides for your group experience.</p>
+  </header>
 
-  <script type="text/babel">
-    const { useState } = React;
-
-    // ─── Constants ───────────────────────────────────────────────────────────
-    const BREAD_SLICES_PER_LOAF      = 20;
-    const GF_BREAD_SLICES_PER_LOAF   = 10; // GF loaves are smaller
-    const MEAT_SLICES_PER_PACK       = 9;
-    const MEAT_SLICES_PER_SANDWICH   = 2;
-    const CHEESE_SLICES_PER_PACK     = 12;
-    const CHEESE_SLICES_PER_SANDWICH = 2;
-    const PB_SERVINGS_PER_JAR        = 15; // ~2 tbsp per sandwich
-    const JELLY_SERVINGS_PER_JAR     = 20;
-    const CRACKER_SERVINGS_PER_BOX   = 30;
-
-    // ─── Calculation logic ────────────────────────────────────────────────────
-    function calcResults({ people, days, pbPercent, dietary }) {
-      const totalSandwiches = people * days;
-      const pbSandwiches    = Math.round(totalSandwiches * (pbPercent / 100));
-      const meatSandwiches  = totalSandwiches - pbSandwiches;
-
-      // Bread — split regular vs GF by exact headcount
-      const gfPeople      = dietary.glutenFreeCount || 0;
-      const regularPeople = people - gfPeople;
-      const regularLoaves = Math.ceil((regularPeople * days * 2) / BREAD_SLICES_PER_LOAF);
-      const gfLoaves      = gfPeople > 0
-        ? Math.ceil((gfPeople * days * 2) / GF_BREAD_SLICES_PER_LOAF)
-        : 0;
-
-      // Lunch meat & cheese (meat sandwiches only)
-      const meatPacks   = meatSandwiches > 0
-        ? Math.ceil((meatSandwiches * MEAT_SLICES_PER_SANDWICH) / MEAT_SLICES_PER_PACK)
-        : 0;
-      const cheesePacks = (!dietary.vegan && meatSandwiches > 0)
-        ? Math.ceil((meatSandwiches * CHEESE_SLICES_PER_SANDWICH) / CHEESE_SLICES_PER_PACK)
-        : 0;
-
-      // PB&J
-      const pbJars    = pbSandwiches > 0 ? Math.ceil(pbSandwiches / PB_SERVINGS_PER_JAR)   : 0;
-      const jellyJars = pbSandwiches > 0 ? Math.ceil(pbSandwiches / JELLY_SERVINGS_PER_JAR) : 0;
-
-      // Packaging
-      const sandwichBags = totalSandwiches;
-      const brownBags    = people * days;
-
-      // Sides
-      const crackerBoxes = Math.ceil((people * days) / CRACKER_SERVINGS_PER_BOX);
-
-      return {
-        totalSandwiches, pbSandwiches, meatSandwiches,
-        regularLoaves, gfLoaves,
-        meatPacks, cheesePacks,
-        pbJars, jellyJars,
-        sandwichBags, brownBags,
-        crackerBoxes,
-      };
-    }
-
-    // ─── Dietary options config ───────────────────────────────────────────────
-    const dietaryOptions = [
-      { key: "glutenFree",  countKey: "glutenFreeCount",  label: "Gluten-Free", icon: "🌾", color: "#e8a838" },
-      { key: "nutFree",     countKey: "nutFreeCount",     label: "Nut-Free",    icon: "🥜", color: "#c0392b" },
-      { key: "vegan",       countKey: "veganCount",       label: "Vegan",       icon: "🌿", color: "#27ae60" },
-      { key: "vegetarian",  countKey: "vegetarianCount",  label: "Vegetarian",  icon: "🥗", color: "#2ecc71" },
-    ];
-
-    // ─── ResultSection component ─────────────────────────────────────────────
-    function ResultSection({ title, items }) {
-      if (!items || items.length === 0) return null;
-      return (
-        <div style={{ marginBottom: "20px" }}>
-          <div style={S.sectionHeading}>{title}</div>
-          <div style={S.itemGrid}>
-            {items.map(item => (
-              <div key={item.label} style={S.itemCard}>
-                <div style={S.itemIcon}>{item.icon}</div>
-                <div style={S.itemQty}>{item.value}</div>
-                <div style={S.itemLabel}>{item.label}</div>
-                {item.note && <div style={S.itemNote}>{item.note}</div>}
-              </div>
-            ))}
+  <!-- Group Details -->
+  <div class="section-header"><span>Group Details</span></div>
+  <div class="panel">
+    <div class="panel-body">
+      <div class="two-up">
+        <div>
+          <div class="field-label">Number of People</div>
+          <div class="stepper">
+            <button id="people-dec">−</button>
+            <input type="number" id="people-input" value="10" min="1">
+            <button id="people-inc">+</button>
           </div>
         </div>
-      );
-    }
-
-    // ─── Main app ─────────────────────────────────────────────────────────────
-    function App() {
-      const [people,     setPeople]     = useState(10);
-      const [days,       setDays]       = useState(3);
-      const [pbPercent,  setPbPercent]  = useState(12);
-      const [dietary,    setDietary]    = useState({
-        glutenFree: false, glutenFreeCount: 0,
-        nutFree:    false, nutFreeCount:    0,
-        vegan:      false, veganCount:      0,
-        vegetarian: false, vegetarianCount: 0,
-      });
-      const [results,    setResults]    = useState(null);
-      const [calculated, setCalculated] = useState(false);
-
-      const toggleDietary = (key, countKey) => {
-        setDietary(prev => {
-          const nowOn = !prev[key];
-          return { ...prev, [key]: nowOn, [countKey]: nowOn ? prev[countKey] : 0 };
-        });
-        setCalculated(false);
-      };
-
-      const setDietaryCount = (countKey, val) => {
-        setDietary(prev => ({ ...prev, [countKey]: Math.max(0, Math.min(people, val)) }));
-        setCalculated(false);
-      };
-
-      const handleCalculate = () => {
-        setResults(calcResults({ people, days, pbPercent, dietary }));
-        setCalculated(true);
-      };
-
-      const step = (setter, current, delta, min = 1) => {
-        setter(Math.max(min, current + delta));
-        setCalculated(false);
-      };
-
-      const sandwichItems = results ? [
-        results.regularLoaves > 0 && { label: "Loaves of Bread",      value: results.regularLoaves, icon: "🍞", note: "Regular" },
-        results.gfLoaves      > 0 && { label: "GF Loaves of Bread",   value: results.gfLoaves,      icon: "🌾", note: "Gluten-Free" },
-        results.meatPacks     > 0 && { label: "Packs of Lunch Meat",  value: results.meatPacks,     icon: "🥩", note: "~2 slices/sandwich" },
-        !dietary.vegan && results.cheesePacks > 0 && { label: "Packs of Cheese", value: results.cheesePacks, icon: "🧀", note: "~2 slices/sandwich" },
-        !dietary.nutFree && results.pbJars > 0    && { label: "Jars of Peanut Butter", value: results.pbJars,    icon: "🥜", note: null },
-        results.jellyJars > 0 && { label: "Jars of Jelly", value: results.jellyJars, icon: "🍇", note: null },
-      ].filter(Boolean) : [];
-
-      const packagingItems = results ? [
-        { label: "Sandwich Bags",      value: results.sandwichBags, icon: "🛍️", note: "1 per sandwich" },
-        { label: "Brown Paper Bags",   value: results.brownBags,    icon: "🧺", note: "1 per person/day" },
-      ] : [];
-
-      const sidesItems = results ? [
-        { label: "Boxes of Crackers", value: results.crackerBoxes, icon: "🫙", note: "~30 servings/box" },
-      ] : [];
-
-      return (
-        <div style={S.page}>
-          <div style={S.card}>
-
-            {/* Header */}
-            <div style={S.header}>
-              <span style={S.headerIcon}>🥪</span>
-              <div>
-                <h1 style={S.title}>Group Lunch Calculator</h1>
-                <p style={S.subtitle}>Group trip grocery planner</p>
-              </div>
-            </div>
-
-            {/* People & Days */}
-            <div style={S.inputGrid}>
-              {[
-                { label: "Number of People", val: people, set: setPeople },
-                { label: "Days Making Lunches", val: days,   set: setDays   },
-              ].map(({ label, val, set }) => (
-                <div key={label} style={S.inputGroup}>
-                  <label style={S.label}>{label}</label>
-                  <div style={S.stepper}>
-                    <button style={{...S.stepBtn, borderRadius:"8px 0 0 8px"}} onClick={() => step(set, val, -1)}>−</button>
-                    <input
-                      type="number"
-                      value={val}
-                      min={1}
-                      onChange={e => { set(Math.max(1, Number(e.target.value))); setCalculated(false); }}
-                      style={S.numInput}
-                    />
-                    <button style={{...S.stepBtn, borderRadius:"0 8px 8px 0"}} onClick={() => step(set, val, +1)}>+</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* PB&J Slider */}
-            <div style={S.sliderGroup}>
-              <label style={S.label}>
-                PB&J vs. Lunch Meat —{" "}
-                <span style={S.accent}>
-                  {pbPercent === 0 ? "All Lunch Meat" : pbPercent === 100 ? "All PB&J" : `${pbPercent}% PB&J`}
-                </span>
-              </label>
-              <input
-                type="range" min={0} max={100} value={pbPercent}
-                onChange={e => { setPbPercent(Number(e.target.value)); setCalculated(false); }}
-                style={S.slider}
-              />
-              <div style={S.sliderLabels}>
-                <span>All Lunch Meat</span>
-                <span>All PB&J</span>
-              </div>
-            </div>
-
-            {/* Dietary */}
-            <div style={S.dietarySection}>
-              <label style={S.label}>Dietary Considerations</label>
-              <div style={S.dietaryGrid}>
-                {dietaryOptions.map(({ key, countKey, label, icon, color }) => (
-                  <div key={key} style={S.dietaryRow}>
-                    <button
-                      onClick={() => toggleDietary(key, countKey)}
-                      style={{
-                        ...S.dietaryBtn,
-                        ...(dietary[key] ? { background: color, color: "#fff", borderColor: color } : {}),
-                      }}
-                    >
-                      <span>{icon}</span>
-                      <span>{label}</span>
-                      {dietary[key] && <span style={S.checkmark}>✓</span>}
-                    </button>
-                    {dietary[key] && (
-                      <div style={S.countRow}>
-                        <span style={S.countLabel}>How many?</span>
-                        <div style={S.miniStepper}>
-                          <button style={S.miniBtn} onClick={() => setDietaryCount(countKey, dietary[countKey] - 1)}>−</button>
-                          <span style={S.countVal}>{dietary[countKey]}</span>
-                          <button style={S.miniBtn} onClick={() => setDietaryCount(countKey, dietary[countKey] + 1)}>+</button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {dietary.nutFree && (
-              <div style={S.alertBox}>
-                ⚠️ Nut-Free selected — peanut butter will be excluded from the shopping list.
-              </div>
-            )}
-
-            {/* Calculate */}
-            <button style={S.calcBtn} onClick={handleCalculate}>
-              Calculate Shopping List
-            </button>
-
-            {/* Results */}
-            {calculated && results && (
-              <div style={S.results}>
-                <div style={S.resultsSummary}>
-                  <span style={S.summaryNum}>{results.totalSandwiches}</span>
-                  <span style={S.summaryLabel}>Total Sandwiches</span>
-                  <span style={S.divider}>·</span>
-                  <span style={S.summaryNum}>{results.meatSandwiches}</span>
-                  <span style={S.summaryLabel}>Meat</span>
-                  <span style={S.divider}>·</span>
-                  <span style={S.summaryNum}>{results.pbSandwiches}</span>
-                  <span style={S.summaryLabel}>PB&J</span>
-                </div>
-                <ResultSection title="🥪 Sandwiches" items={sandwichItems} />
-                <ResultSection title="🛍️ Packaging"  items={packagingItems} />
-                <ResultSection title="🍘 Sides"       items={sidesItems} />
-              </div>
-            )}
-
+        <div>
+          <div class="field-label">Days Making Lunches</div>
+          <div class="stepper">
+            <button id="days-dec">−</button>
+            <input type="number" id="days-input" value="3" min="1">
+            <button id="days-inc">+</button>
           </div>
         </div>
-      );
-    }
+      </div>
+    </div>
+  </div>
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  <!-- Sandwich Mix -->
+  <div class="section-header"><span>Sandwich Mix</span></div>
+  <div class="panel">
+    <div class="panel-body">
+      <div class="slider-row">
+        <span class="field-label" style="margin-bottom:0">PB&amp;J vs. Lunch Meat</span>
+        <span class="slider-val" id="slider-label">12% PB&amp;J</span>
+      </div>
+      <input type="range" id="pb-slider" min="0" max="100" value="12">
+      <div class="slider-ends">
+        <span>All Lunch Meat</span>
+        <span>All PB&amp;J</span>
+      </div>
+    </div>
+  </div>
 
-    // ─── Styles ───────────────────────────────────────────────────────────────
-    const S = {
-      page: { minHeight:"100vh", display:"flex", alignItems:"flex-start", justifyContent:"center", padding:"32px 16px", fontFamily:"Georgia, serif" },
-      card: { background:"rgba(255,255,255,0.04)", backdropFilter:"blur(20px)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:"24px", padding:"36px", width:"100%", maxWidth:"580px", color:"#f0f0f0" },
-      header: { display:"flex", alignItems:"center", gap:"16px", marginBottom:"32px", borderBottom:"1px solid rgba(255,255,255,0.1)", paddingBottom:"24px" },
-      headerIcon: { fontSize:"48px" },
-      title: { margin:0, fontSize:"28px", fontWeight:"700", letterSpacing:"-0.5px" },
-      subtitle: { margin:"4px 0 0", color:"#aaa", fontSize:"14px", fontStyle:"italic" },
-      inputGrid: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"20px", marginBottom:"24px" },
-      inputGroup: { display:"flex", flexDirection:"column", gap:"8px" },
-      label: { fontSize:"13px", textTransform:"uppercase", letterSpacing:"0.08em", color:"#aaa", fontFamily:"sans-serif" },
-      stepper: { display:"flex", alignItems:"center" },
-      stepBtn: { background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.15)", color:"#fff", width:"36px", height:"44px", cursor:"pointer", fontSize:"18px" },
-      numInput: { background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.15)", borderLeft:"none", borderRight:"none", color:"#fff", textAlign:"center", fontSize:"20px", fontFamily:"Georgia, serif", width:"70px", height:"44px", outline:"none" },
-      sliderGroup: { marginBottom:"24px" },
-      accent: { color:"#f0a500" },
-      slider: { width:"100%", marginTop:"10px", accentColor:"#f0a500", display:"block" },
-      sliderLabels: { display:"flex", justifyContent:"space-between", fontSize:"11px", color:"#666", marginTop:"4px", fontFamily:"sans-serif" },
-      dietarySection: { marginBottom:"24px" },
-      dietaryGrid: { display:"flex", flexDirection:"column", gap:"10px", marginTop:"10px" },
-      dietaryRow: { display:"flex", flexDirection:"column", gap:"6px" },
-      dietaryBtn: { display:"flex", alignItems:"center", gap:"8px", padding:"10px 14px", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:"10px", color:"#ddd", cursor:"pointer", fontSize:"14px", fontFamily:"sans-serif" },
-      checkmark: { marginLeft:"auto", fontSize:"12px" },
-      countRow: { display:"flex", alignItems:"center", gap:"12px", paddingLeft:"12px" },
-      countLabel: { fontSize:"12px", color:"#aaa", fontFamily:"sans-serif" },
-      miniStepper: { display:"flex", alignItems:"center", gap:"0" },
-      miniBtn: { background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.2)", color:"#fff", width:"28px", height:"28px", cursor:"pointer", fontSize:"14px", borderRadius:"6px" },
-      countVal: { width:"36px", textAlign:"center", fontSize:"16px", fontFamily:"Georgia, serif", color:"#f0a500" },
-      alertBox: { background:"rgba(240,165,0,0.12)", border:"1px solid rgba(240,165,0,0.3)", borderRadius:"10px", padding:"12px 16px", fontSize:"13px", color:"#f0c060", marginBottom:"20px", fontFamily:"sans-serif" },
-      calcBtn: { width:"100%", padding:"16px", background:"linear-gradient(135deg, #f0a500, #e8621a)", border:"none", borderRadius:"12px", color:"#fff", fontSize:"16px", fontWeight:"700", cursor:"pointer", letterSpacing:"0.04em", fontFamily:"Georgia, serif" },
-      results: { marginTop:"28px", borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:"24px" },
-      resultsSummary: { display:"flex", alignItems:"center", gap:"10px", marginBottom:"20px", background:"rgba(255,255,255,0.04)", borderRadius:"12px", padding:"14px 18px", flexWrap:"wrap" },
-      summaryNum: { fontSize:"24px", fontWeight:"700", color:"#f0a500" },
-      summaryLabel: { fontSize:"13px", color:"#aaa", fontFamily:"sans-serif" },
-      divider: { color:"#444", fontSize:"20px" },
-      sectionHeading: { fontSize:"13px", textTransform:"uppercase", letterSpacing:"0.08em", color:"#f0a500", fontFamily:"sans-serif", fontWeight:"700", marginBottom:"10px", marginTop:"4px" },
-      itemGrid: { display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:"12px" },
-      itemCard: { background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:"14px", padding:"16px 12px", textAlign:"center" },
-      itemIcon: { fontSize:"28px", marginBottom:"6px" },
-      itemQty: { fontSize:"32px", fontWeight:"700", color:"#f0a500", lineHeight:1 },
-      itemLabel: { fontSize:"12px", color:"#ccc", marginTop:"6px", fontFamily:"sans-serif", lineHeight:"1.3" },
-      itemNote: { fontSize:"10px", color:"#777", marginTop:"3px", fontFamily:"sans-serif" },
-    };
-  </script>
+  <!-- Dietary -->
+  <div class="section-header"><span>Dietary Considerations</span></div>
+  <div class="panel">
+    <div class="panel-body">
+      <div class="dietary-grid" id="dietary-grid"></div>
+      <div class="alert" id="nut-alert" style="display:none">
+        Nut-Free selected — peanut butter will be excluded from the list.
+      </div>
+    </div>
+  </div>
+
+  <!-- Button -->
+  <div class="calc-btn-wrap">
+    <button class="calc-btn" id="calc-btn">Calculate Shopping List</button>
+  </div>
+
+  <!-- Results (hidden until calculated) -->
+  <div id="results" style="display:none">
+
+    <div class="section-header"><span>Summary</span></div>
+    <div class="summary-bar">
+      <div class="summary-cell">
+        <div class="summary-num" id="r-total">0</div>
+        <div class="summary-lbl">Total Sandwiches</div>
+      </div>
+      <div class="summary-cell">
+        <div class="summary-num" id="r-meat-count">0</div>
+        <div class="summary-lbl">Meat</div>
+      </div>
+      <div class="summary-cell">
+        <div class="summary-num" id="r-pb-count">0</div>
+        <div class="summary-lbl">PB&amp;J</div>
+      </div>
+    </div>
+
+    <div class="section-header"><span>Sandwiches</span></div>
+    <div class="result-grid" id="r-sandwich-grid"></div>
+
+    <div class="section-header"><span>Packaging</span></div>
+    <div class="result-grid" id="r-packaging-grid"></div>
+
+    <div class="section-header"><span>Sides</span></div>
+    <div class="result-grid" id="r-sides-grid"></div>
+
+    <br>
+    <div class="tip">
+      <strong>Tip:</strong> All quantities round up to the nearest whole unit. Consider grabbing one extra pack of lunch meat as a buffer for hungry days.
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-rule"></div>
+    <div class="footer-text"><strong>Brock Experiences</strong> · Longwood University</div>
+  </footer>
+
+</div>
+
+<script>
+// ─── Constants ────────────────────────────────────────────────────────────────
+const BREAD_SLICES_PER_LOAF      = 20;
+const GF_BREAD_SLICES_PER_LOAF   = 10;
+const MEAT_SLICES_PER_PACK       = 9;
+const MEAT_SLICES_PER_SANDWICH   = 2;
+const CHEESE_SLICES_PER_PACK     = 12;
+const CHEESE_SLICES_PER_SANDWICH = 2;
+const PB_SERVINGS_PER_JAR        = 15;
+const JELLY_SERVINGS_PER_JAR     = 20;
+const CRACKER_SERVINGS_PER_BOX   = 30;
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let people    = 10;
+let days      = 3;
+let pbPercent = 12;
+
+const dietary = {
+  glutenFree: false, glutenFreeCount: 0,
+  nutFree:    false, nutFreeCount:    0,
+  vegan:      false, veganCount:      0,
+  vegetarian: false, vegetarianCount: 0,
+};
+
+const dietaryOptions = [
+  { key: 'glutenFree', countKey: 'glutenFreeCount', label: 'Gluten-Free', icon: '🌾' },
+  { key: 'nutFree',    countKey: 'nutFreeCount',    label: 'Nut-Free',    icon: '🥜' },
+  { key: 'vegan',      countKey: 'veganCount',      label: 'Vegan',       icon: '🌿' },
+  { key: 'vegetarian', countKey: 'vegetarianCount', label: 'Vegetarian',  icon: '🥗' },
+];
+
+// ─── Calc ─────────────────────────────────────────────────────────────────────
+function calcResults() {
+  const totalSandwiches = people * days;
+  const pbSandwiches    = Math.round(totalSandwiches * (pbPercent / 100));
+  const meatSandwiches  = totalSandwiches - pbSandwiches;
+
+  const gfPeople      = dietary.glutenFreeCount || 0;
+  const regularPeople = people - gfPeople;
+  const regularLoaves = Math.ceil((regularPeople * days * 2) / BREAD_SLICES_PER_LOAF);
+  const gfLoaves      = gfPeople > 0 ? Math.ceil((gfPeople * days * 2) / GF_BREAD_SLICES_PER_LOAF) : 0;
+
+  const meatPacks   = meatSandwiches > 0 ? Math.ceil((meatSandwiches * MEAT_SLICES_PER_SANDWICH) / MEAT_SLICES_PER_PACK) : 0;
+  const cheesePacks = (!dietary.vegan && meatSandwiches > 0) ? Math.ceil((meatSandwiches * CHEESE_SLICES_PER_SANDWICH) / CHEESE_SLICES_PER_PACK) : 0;
+  const pbJars      = pbSandwiches > 0 ? Math.ceil(pbSandwiches / PB_SERVINGS_PER_JAR)   : 0;
+  const jellyJars   = pbSandwiches > 0 ? Math.ceil(pbSandwiches / JELLY_SERVINGS_PER_JAR) : 0;
+  const sandwichBags = totalSandwiches;
+  const brownBags    = people * days;
+  const crackerBoxes = Math.ceil((people * days) / CRACKER_SERVINGS_PER_BOX);
+
+  return { totalSandwiches, pbSandwiches, meatSandwiches, regularLoaves, gfLoaves, meatPacks, cheesePacks, pbJars, jellyJars, sandwichBags, brownBags, crackerBoxes };
+}
+
+// ─── Render helpers ───────────────────────────────────────────────────────────
+function resultCard(icon, qty, name, note) {
+  return `<div class="result-card">
+    <div class="result-icon">${icon}</div>
+    <div class="result-qty">${qty}</div>
+    <div class="result-name">${name}</div>
+    ${note ? `<div class="result-note">${note}</div>` : ''}
+  </div>`;
+}
+
+function renderResults() {
+  const r = calcResults();
+
+  document.getElementById('r-total').textContent     = r.totalSandwiches;
+  document.getElementById('r-meat-count').textContent = r.meatSandwiches;
+  document.getElementById('r-pb-count').textContent   = r.pbSandwiches;
+
+  // Sandwiches
+  let sw = '';
+  if (r.regularLoaves > 0) sw += resultCard('🍞', r.regularLoaves, 'Loaves of Bread',     'Regular');
+  if (r.gfLoaves      > 0) sw += resultCard('🌾', r.gfLoaves,      'GF Loaves of Bread',  'Gluten-Free');
+  if (r.meatPacks     > 0) sw += resultCard('🥩', r.meatPacks,     'Packs of Lunch Meat', '~2 slices/sandwich');
+  if (!dietary.vegan && r.cheesePacks > 0) sw += resultCard('🧀', r.cheesePacks, 'Packs of Cheese', '~2 slices/sandwich');
+  if (!dietary.nutFree && r.pbJars > 0)    sw += resultCard('🥜', r.pbJars,      'Jars of Peanut Butter', '');
+  if (r.jellyJars > 0) sw += resultCard('🍇', r.jellyJars, 'Jars of Jelly', '');
+  document.getElementById('r-sandwich-grid').innerHTML = sw;
+
+  // Packaging
+  let pk = '';
+  pk += resultCard('🛍️', r.sandwichBags, 'Sandwich Bags',    '1 per sandwich');
+  pk += resultCard('🧺', r.brownBags,    'Brown Paper Bags', '1 per person/day');
+  document.getElementById('r-packaging-grid').innerHTML = pk;
+
+  // Sides
+  document.getElementById('r-sides-grid').innerHTML =
+    resultCard('🫙', r.crackerBoxes, 'Boxes of Crackers', '~30 servings/box');
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── Dietary grid render ──────────────────────────────────────────────────────
+function renderDietary() {
+  const grid = document.getElementById('dietary-grid');
+  grid.innerHTML = '';
+
+  dietaryOptions.forEach(({ key, countKey, label, icon }) => {
+    const isActive = dietary[key];
+    const item = document.createElement('div');
+    item.className = 'dietary-item' + (isActive ? ' active' : '');
+
+    item.innerHTML = `
+      <button class="dietary-toggle" data-key="${key}" data-count-key="${countKey}">
+        <span class="dietary-icon">${icon}</span>
+        <span class="dietary-name">${label}</span>
+        <span class="dietary-check">${isActive ? '✓' : ''}</span>
+      </button>
+      ${isActive ? `
+      <div class="dietary-count-row">
+        <span class="dietary-count-label">How many?</span>
+        <div class="mini-stepper">
+          <button class="count-dec" data-count-key="${countKey}">−</button>
+          <span>${dietary[countKey]}</span>
+          <button class="count-inc" data-count-key="${countKey}">+</button>
+        </div>
+      </div>` : ''}
+    `;
+    grid.appendChild(item);
+  });
+
+  // Nut-free alert
+  document.getElementById('nut-alert').style.display = dietary.nutFree ? 'block' : 'none';
+}
+
+// ─── Event wiring ─────────────────────────────────────────────────────────────
+
+// People stepper
+document.getElementById('people-dec').addEventListener('click', () => {
+  people = Math.max(1, people - 1);
+  document.getElementById('people-input').value = people;
+});
+document.getElementById('people-inc').addEventListener('click', () => {
+  people++;
+  document.getElementById('people-input').value = people;
+});
+document.getElementById('people-input').addEventListener('change', e => {
+  people = Math.max(1, parseInt(e.target.value) || 1);
+  e.target.value = people;
+});
+
+// Days stepper
+document.getElementById('days-dec').addEventListener('click', () => {
+  days = Math.max(1, days - 1);
+  document.getElementById('days-input').value = days;
+});
+document.getElementById('days-inc').addEventListener('click', () => {
+  days++;
+  document.getElementById('days-input').value = days;
+});
+document.getElementById('days-input').addEventListener('change', e => {
+  days = Math.max(1, parseInt(e.target.value) || 1);
+  e.target.value = days;
+});
+
+// PB slider
+document.getElementById('pb-slider').addEventListener('input', e => {
+  pbPercent = parseInt(e.target.value);
+  const lbl = pbPercent === 0 ? 'All Lunch Meat' : pbPercent === 100 ? 'All PB&J' : `${pbPercent}% PB&J`;
+  document.getElementById('slider-label').textContent = lbl;
+});
+
+// Dietary grid (event delegation)
+document.getElementById('dietary-grid').addEventListener('click', e => {
+  const toggleBtn = e.target.closest('.dietary-toggle');
+  const decBtn    = e.target.closest('.count-dec');
+  const incBtn    = e.target.closest('.count-inc');
+
+  if (toggleBtn) {
+    const key      = toggleBtn.dataset.key;
+    const countKey = toggleBtn.dataset.countKey;
+    dietary[key] = !dietary[key];
+    if (!dietary[key]) dietary[countKey] = 0;
+    renderDietary();
+  } else if (decBtn) {
+    const ck = decBtn.dataset.countKey;
+    dietary[ck] = Math.max(0, dietary[ck] - 1);
+    renderDietary();
+  } else if (incBtn) {
+    const ck = incBtn.dataset.countKey;
+    dietary[ck] = Math.min(people, dietary[ck] + 1);
+    renderDietary();
+  }
+});
+
+// Calculate
+document.getElementById('calc-btn').addEventListener('click', renderResults);
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+renderDietary();
+</script>
 </body>
 </html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#002147">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tools">
+<title>Longwood Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --longwood-dark-green: #004c46;
+    --longwood-navy: #002147;
+    --longwood-mint: #ceebee;
+    --longwood-gray: #a2a4a3;
+    --brock-gold: #dfc25b;
+    --brock-stone: #baab93;
+    --white: #ffffff;
+    --off-white: #f7f5f1;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--off-white);
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--longwood-navy);
+  }
+
+  /* Gold sidebar strip — brand signature */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--brock-gold);
+    z-index: 100;
+  }
+
+  .shell {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 3rem;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--longwood-navy);
+    padding: 2rem 1.75rem 1.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .header-eyebrow {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brock-gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 2rem;
+    line-height: 1.05;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .header-title em {
+    font-style: italic;
+    color: var(--longwood-mint);
+  }
+
+  .heading-rule {
+    width: 48px;
+    height: 2px;
+    background: var(--brock-gold);
+    margin: 0.9rem 0 0.75rem;
+  }
+
+  .header-sub {
+    font-size: 0.78rem;
+    font-weight: 300;
+    color: var(--brock-stone);
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+
+  .clock-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .clock-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--longwood-gray);
+  }
+
+  .clock-time {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--brock-gold);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Section label ── */
+  .section-header {
+    padding: 1.75rem 1.75rem 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-header span {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--longwood-gray);
+    white-space: nowrap;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--longwood-gray);
+    opacity: 0.3;
+  }
+
+  /* ── Tool grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 1.25rem 0 1.75rem;
+  }
+
+  /* ── Tool card ── */
+  .tool-card {
+    background: var(--white);
+    border: 1px solid #e2ddd6;
+    border-left: 3px solid var(--brock-gold);
+    padding: 1.1rem 1rem 1rem;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.18s, box-shadow 0.18s, transform 0.1s;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tool-card:hover,
+  .tool-card:focus {
+    background: var(--longwood-mint);
+    box-shadow: 0 4px 16px rgba(0,33,71,0.1);
+    outline: none;
+  }
+
+  .tool-card:active { transform: scale(0.975); }
+
+  .tool-card.empty {
+    border-left-color: #e2ddd6;
+    background: var(--off-white);
+    cursor: default;
+    opacity: 0.55;
+  }
+
+  .indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--longwood-dark-green);
+    margin-bottom: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  .tool-card.empty .indicator {
+    background: var(--longwood-gray);
+    opacity: 0.4;
+  }
+
+  .tool-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--longwood-navy);
+    line-height: 1.2;
+  }
+
+  .tool-card.empty .tool-name { color: var(--longwood-gray); }
+
+  .tool-desc {
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: var(--longwood-gray);
+    line-height: 1.45;
+  }
+
+  .launch-label {
+    margin-top: 0.4rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--longwood-dark-green);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .tool-card:hover .launch-label,
+  .tool-card:focus .launch-label { opacity: 1; }
+  .tool-card.empty .launch-label { display: none; }
+
+  /* ── Footer ── */
+  footer {
+    padding: 2rem 1.75rem 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--longwood-gray);
+    opacity: 0.25;
+  }
+
+  .footer-text {
+    font-size: 0.62rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--longwood-gray);
+  }
+
+  .footer-text strong {
+    color: var(--longwood-dark-green);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <div class="header-eyebrow">Longwood University</div>
+    <h1 class="header-title">Tools &amp; <em>Resources</em></h1>
+    <div class="heading-rule"></div>
+    <p class="header-sub">Quick access to tools and calculators for your work.</p>
+    <div class="clock-row">
+      <span class="clock-label">Local Time</span>
+      <span class="clock-time" id="time-display">--:--</span>
+    </div>
+  </header>
+
+  <div class="section-header"><span>Available Tools</span></div>
+
+  <div class="grid" id="tool-grid"></div>
+
+  <footer>
+    <div class="footer-rule"></div>
+    <div class="footer-text"><strong>Brock Experiences</strong> · Longwood University</div>
+  </footer>
+
+</div>
+
+<script>
+// ── EDIT YOUR TOOLS HERE ──────────────────────────────────────────────────────
+// Add, remove, or reorder entries. Keep name short (fits in card).
+// Leave url as '' to show the slot as inactive (no link).
+const tools = [
+  { name: 'Tool One',   desc: 'Short description of what this does', url: '' },
+  { name: 'Tool Two',   desc: 'Short description of what this does', url: '' },
+  { name: 'Tool Three', desc: 'Short description of what this does', url: '' },
+  { name: 'Tool Four',  desc: 'Short description of what this does', url: '' },
+  { name: 'Tool Five',  desc: 'Short description of what this does', url: '' },
+];
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderGrid() {
+  const grid = document.getElementById('tool-grid');
+  grid.innerHTML = '';
+  tools.forEach(t => {
+    const hasUrl = t.url && t.url.trim();
+    const card = document.createElement(hasUrl ? 'a' : 'div');
+    card.className = 'tool-card' + (hasUrl ? '' : ' empty');
+    if (hasUrl) {
+      card.href = t.url.trim();
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+    }
+    card.setAttribute('tabindex', hasUrl ? '0' : '-1');
+    card.innerHTML = `
+      <div class="indicator"></div>
+      <div class="tool-name">${t.name || 'Empty Slot'}</div>
+      <div class="tool-desc">${t.desc || ''}</div>
+      <div class="launch-label">Open ›</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function tick() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('time-display').textContent = `${hh}:${mm}`;
+}
+
+tick();
+setInterval(tick, 10000);
+renderGrid();
+</script>
+</body>
+</html>
